@@ -25,23 +25,6 @@ function filterFormFields($requestname)
 
 
 
-
-// $firebase = (new Factory())
-//     ->withServiceAccount([
-//         'type' => $_ENV['FIREBASE_TYPE'],
-//         'project_id' => $_ENV['FIREBASE_PROJECT_ID'],
-//         'private_key_id' => $_ENV['FIREBASE_PRIVATE_KEY_ID'],
-//         'private_key' => str_replace('\\n', "\n", $_ENV['FIREBASE_PRIVATE_KEY']),
-//         'client_email' => $_ENV['FIREBASE_CLIENT_EMAIL'],
-//         'client_id' => $_ENV['FIREBASE_CLIENT_ID'],
-//         'auth_uri' => $_ENV['FIREBASE_AUTH_URI'],
-//         'token_uri' => $_ENV['FIREBASE_TOKEN_URI'],
-//         'auth_provider_x509_cert_url' => $_ENV['FIREBASE_AUTH_PROVIDER_X509_CERT_URL'],
-//         'client_x509_cert_url' => $_ENV['FIREBASE_CLIENT_X509_CERT_URL'],
-//         'universe_domain' => $_ENV['FIREBASE_UNIVERSE_DOMAIN'],
-//     ])
-//     ->create();
-
 //getting firebase config from .env file
 
 
@@ -437,17 +420,18 @@ function sendGCM($title, $message, $topic, $pageid, $pagename)
     );
 
     $firebase = [
-        'type' => $_ENV['FIREBASE_TYPE'],
-        'project_id' => $_ENV['FIREBASE_PROJECT_ID'],
-        'private_key_id' => $_ENV['FIREBASE_PRIVATE_KEY_ID'],
-        'private_key' => str_replace('\\n', "\n", $_ENV['FIREBASE_PRIVATE_KEY']),
-        'client_email' => $_ENV['FIREBASE_CLIENT_EMAIL'],
-        'client_id' => $_ENV['FIREBASE_CLIENT_ID'],
-        'auth_uri' => $_ENV['FIREBASE_AUTH_URI'],
-        'token_uri' => $_ENV['FIREBASE_TOKEN_URI'],
-        'auth_provider_x509_cert_url' => $_ENV['FIREBASE_AUTH_PROVIDER_X509_CERT_URL'],
-        'client_x509_cert_url' => $_ENV['FIREBASE_CLIENT_X509_CERT_URL'],
-        'universe_domain' => $_ENV['FIREBASE_UNIVERSE_DOMAIN'],
+        'type' => getenv('FIREBASE_TYPE'),
+        'type' => getenv('FIREBASE_TYPE'),
+        'project_id' => getenv('FIREBASE_PROJECT_ID'),
+        'private_key_id' => getenv('FIREBASE_PRIVATE_KEY_ID'),
+        'private_key' => str_replace('\\n', "\n", getenv('FIREBASE_PRIVATE_KEY')),
+        'client_email' => getenv('FIREBASE_CLIENT_EMAIL'),
+        'client_id' => getenv('FIREBASE_CLIENT_ID'),
+        'auth_uri' => getenv('FIREBASE_AUTH_URI'),
+        'token_uri' => getenv('FIREBASE_TOKEN_URI'),
+        'auth_provider_x509_cert_url' => getenv('FIREBASE_AUTH_PROVIDER_X509_CERT_URL'),
+        'client_x509_cert_url' => getenv('FIREBASE_CLIENT_X509_CERT_URL'),
+        'universe_domain' => getenv('FIREBASE_UNIVERSE_DOMAIN'),
     ];
         
     

@@ -5,8 +5,15 @@
 // require  $_SERVER['DOCUMENT_ROOT'] .'/mail/Exception.php';
 // require  $_SERVER['DOCUMENT_ROOT'] .'/mail/PHPMailer.php';
 // require  $_SERVER['DOCUMENT_ROOT'] .'/mail/SMTP.php';
+use Dotenv\Dotenv;
+
+require 'vendor/autoload.php';
+
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load(); // If you're using Composer
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
+
 define('MB', 1048576);
 // define('IMAGE_SERVER_DIR', "/opt/lampp/htdocs/noteApp/upload/");
 
@@ -14,6 +21,28 @@ function filterFormFields($requestname)
 {
     return htmlspecialchars(strip_tags($_POST[$requestname]));
 }
+
+
+
+
+
+// $firebase = (new Factory())
+//     ->withServiceAccount([
+//         'type' => $_ENV['FIREBASE_TYPE'],
+//         'project_id' => $_ENV['FIREBASE_PROJECT_ID'],
+//         'private_key_id' => $_ENV['FIREBASE_PRIVATE_KEY_ID'],
+//         'private_key' => str_replace('\\n', "\n", $_ENV['FIREBASE_PRIVATE_KEY']),
+//         'client_email' => $_ENV['FIREBASE_CLIENT_EMAIL'],
+//         'client_id' => $_ENV['FIREBASE_CLIENT_ID'],
+//         'auth_uri' => $_ENV['FIREBASE_AUTH_URI'],
+//         'token_uri' => $_ENV['FIREBASE_TOKEN_URI'],
+//         'auth_provider_x509_cert_url' => $_ENV['FIREBASE_AUTH_PROVIDER_X509_CERT_URL'],
+//         'client_x509_cert_url' => $_ENV['FIREBASE_CLIENT_X509_CERT_URL'],
+//         'universe_domain' => $_ENV['FIREBASE_UNIVERSE_DOMAIN'],
+//     ])
+//     ->create();
+
+//getting firebase config from .env file
 
 
 
@@ -407,10 +436,25 @@ function sendGCM($title, $message, $topic, $pageid, $pagename)
 
     );
 
+    $firebase = [
+        'type' => $_ENV['FIREBASE_TYPE'],
+        'project_id' => $_ENV['FIREBASE_PROJECT_ID'],
+        'private_key_id' => $_ENV['FIREBASE_PRIVATE_KEY_ID'],
+        'private_key' => str_replace('\\n', "\n", $_ENV['FIREBASE_PRIVATE_KEY']),
+        'client_email' => $_ENV['FIREBASE_CLIENT_EMAIL'],
+        'client_id' => $_ENV['FIREBASE_CLIENT_ID'],
+        'auth_uri' => $_ENV['FIREBASE_AUTH_URI'],
+        'token_uri' => $_ENV['FIREBASE_TOKEN_URI'],
+        'auth_provider_x509_cert_url' => $_ENV['FIREBASE_AUTH_PROVIDER_X509_CERT_URL'],
+        'client_x509_cert_url' => $_ENV['FIREBASE_CLIENT_X509_CERT_URL'],
+        'universe_domain' => $_ENV['FIREBASE_UNIVERSE_DOMAIN'],
+    ];
+        
+    
     
     $fields = json_encode($fields);
 
-    $serviceAccountCredentials = json_decode(file_get_contents(__DIR__.'/e-commerce-e529b-firebase-adminsdk-8s8l9-66c85d2e7c.json'), true);
+    $serviceAccountCredentials = json_decode(implode($firebase), true);
     $serviceAccountCredentials = new ServiceAccountCredentials(
         'https://www.googleapis.com/auth/firebase.messaging',
         $serviceAccountCredentials 
@@ -454,12 +498,12 @@ function insertNotification($title, $body,$userId, $topic=null, $pageid=null, $p
 // $mail->isSMTP();
 // $mail->Host = 'smtp.gmail.com';
 // $mail->SMTPAuth = true;
-// $mail->Username = 'bektokmalen@gmail.com';
-// $mail->Password = 'aIine_838L-j';
+// $mail->Username = 'example@email.com';
+// $mail->Password = 'example1234';
 // $mail->SMTPSecure = 'tls';
 // $mail->Port = 587;
 
-// $mail->setFrom('bektokmalen@gmail.com', 'Your shop');
+// $mail->setFrom('example@email.com', 'Your shop');
 // $mail->addAddress($to);
 // $mail->Subject = $title;
 // $mail->Body = $body;

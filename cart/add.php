@@ -9,5 +9,5 @@ $itemsid = filterFormFields("item_id");
 $itemCount = filterFormFields("item_count");
 // echo "itemcount".$itemCount;
 // echo "itemid".$itemsid;
-addItemTocart([$usersid, $itemsid,$itemCount]);
+addItemToCart($usersid, $itemsid, $itemCount);
 ?>

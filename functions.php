@@ -259,39 +259,86 @@ function insertData($table, $data, $json = true)
         return 0; // Return 0 or false to indicate an error
     }
 }
-function addItemTocart($values)
-{
 
+function addItemToCart($userId, $itemId, $itemCount = 1) {
     global $con;
-    $table = "cart";
-    $where = "cart_user_id = ? AND cart_item_id = ? ";
-    $data = array();
 
-    $stmt = $con->prepare("SELECT  * FROM $table WHERE   $where ");
-    $stmt->execute([$values[0], $values[1]]);
-    $data = $stmt->fetch(PDO::FETCH_ASSOC);
-    $count  = $stmt->rowCount();
-    $cartItemCount = $data['cart_item_count'];
-    if ($cartItemCount == null) {
-        $cartItemCount = 0;
-    }
-    if ($count > 0) {
+    // 1. Check if an active cart exists for the user 
+    $stmt = $con->prepare("SELECT cart_id FROM cart WHERE cart_user_id = :userId AND cart_order_id = 0");
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+    $stmt->execute();
 
-        if ($values[2] != null && $values[2] != 0) {
-            updateData("cart", ["cart_item_count" => $cartItemCount + $values[2]], "cart_user_id = " . $values[0] . " AND cart_item_id = " . $values[1],);
+    if ($stmt->rowCount() > 0) {
+        // Active cart found - get cart_id
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $cartId = $row['cart_id'];
+
+        // 2. Check if item already exists in this cart
+        $stmt = $con->prepare("SELECT cart_item_count FROM cart WHERE cart_id = :cartId AND cart_item_id = :itemId");
+        $stmt->bindParam(':cartId', $cartId, PDO::PARAM_INT);
+        $stmt->bindParam(':itemId', $itemId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            // Item exists - update count
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $newCount = $row['cart_item_count'] + $itemCount; 
+            updateData("cart", ["cart_item_count" => $newCount], "cart_id = $cartId AND cart_item_id = $itemId");
         } else {
-            updateData("cart", ["cart_item_count" => $cartItemCount + 1], "cart_user_id = " . $values[0] . " AND cart_item_id = " . $values[1],);
+            // Item doesn't exist - add a new cart entry
+            $stmt = $con->prepare("INSERT INTO cart (cart_user_id, cart_item_id, cart_item_count, cart_order_id) 
+                                  VALUES (:userId, :itemId, :itemCount, 0)"); // cart_order_id set to 0
+            $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+            $stmt->bindParam(':itemId', $itemId, PDO::PARAM_INT);
+            $stmt->bindParam(':itemCount', $itemCount, PDO::PARAM_INT);
+            $stmt->execute();
         }
-    } else {
 
-        if ($values[2] != null && $values[2] != 0) {
-            insertData("cart", ["cart_user_id" => $values[0], "cart_item_id" => $values[1], "cart_item_count" => $values[2],"cart_order_id"=> "0"]);
-        } else {
-
-            insertData("cart", ["cart_user_id" => $values[0], "cart_item_id" => $values[1],"cart_order_id"=> "0"]);
-        }
+    } else { 
+        // No active cart - create a new one
+        $stmt = $con->prepare("INSERT INTO cart (cart_user_id, cart_item_id, cart_item_count, cart_order_id) 
+                              VALUES (:userId, :itemId, :itemCount, 0)"); // cart_order_id set to 0 
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+        $stmt->bindParam(':itemId', $itemId, PDO::PARAM_INT);
+        $stmt->bindParam(':itemCount', $itemCount, PDO::PARAM_INT);
+        $stmt->execute();
     }
+
+    successMessage(); 
 }
+// function addItemTocart($values)
+// {
+
+//     global $con;
+//     $table = "cart";
+//     $where = "cart_user_id = ? AND cart_item_id = ? ";
+//     $data = array();
+
+//     $stmt = $con->prepare("SELECT  * FROM $table WHERE   $where ");
+//     $stmt->execute([$values[0], $values[1]]);
+//     $data = $stmt->fetch(PDO::FETCH_ASSOC);
+//     $count  = $stmt->rowCount();
+//     $cartItemCount = $data['cart_item_count'];
+//     if ($cartItemCount == null) {
+//         $cartItemCount = 0;
+//     }
+//     if ($count > 0) {
+
+//         if ($values[2] != null && $values[2] != 0) {
+//             updateData("cart", ["cart_item_count" => $cartItemCount + $values[2]], "cart_user_id = " . $values[0] . " AND cart_item_id = " . $values[1],);
+//         } else {
+//             updateData("cart", ["cart_item_count" => $cartItemCount + 1], "cart_user_id = " . $values[0] . " AND cart_item_id = " . $values[1],);
+//         }
+//     } else {
+
+//         if ($values[2] != null && $values[2] != 0) {
+//             insertData("cart", ["cart_user_id" => $values[0], "cart_item_id" => $values[1], "cart_item_count" => $values[2],"cart_order_id"=> "0"]);
+//         } else {
+
+//             insertData("cart", ["cart_user_id" => $values[0], "cart_item_id" => $values[1],"cart_order_id"=> "0"]);
+//         }
+//     }
+// }
 function deleteItemFromCart($values)
 {
     global $con;

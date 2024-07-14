@@ -304,7 +304,7 @@ function addItemToCart($userId, $itemId, $itemCount = 1) {
         $stmt->execute();
     }
 
-    successMessage(); 
+    // successMessage(); 
 }
 // function addItemTocart($values)
 // {

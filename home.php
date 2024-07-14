@@ -10,8 +10,6 @@ $allData['status'] = 'success';
 $allData[$homeCartSettings] = getAllData($homeCartSettings, null, null, false);
 $allData[$categoryTable] = getAllData($categoryTable, null, null, false);
 
-//TODO: Add price after discount to this view
-//- add a column in items table to store the price after discount
 
 // Check if itemsTable has data
 $itemsData = getAllDataModified($itemsTable, "1=1 ORDER BY countTimes DESC", null, false);

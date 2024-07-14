@@ -29,7 +29,9 @@ $stmt->execute();
 
 
 $datacountprice = $stmt->fetch(PDO::FETCH_ASSOC);
-
+if($datacountprice['cart_total_price'] == false){
+    $datacountprice = 0.0;
+}
 echo json_encode(array(
     "status" => "success",
     "countprice" =>  $datacountprice,

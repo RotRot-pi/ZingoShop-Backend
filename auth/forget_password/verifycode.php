@@ -1,5 +1,5 @@
 <?php
-include "../connect.php";
+include "../../connect.php";
 $email = filterFormFields('email');
 
 $verifycode = filterFormFields('verifyCode');

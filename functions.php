@@ -16,6 +16,7 @@ use Google\Auth\HttpHandler\HttpHandlerFactory;
 
 define('MB', 1048576);
 // define('IMAGE_SERVER_DIR', "/opt/lampp/htdocs/noteApp/upload/");
+define("STRIPE_SECRET_KEY","sk_test_51Q5uITRxA46rh2n2NBFbvIGpJ5RU76c0yL2GegerWPRnAvoivRikZedAA1XZLGveswjLNBkWtdD6qL58fvuZfJlc00uV01aYfS");
 
 function filterFormFields($requestname)
 {

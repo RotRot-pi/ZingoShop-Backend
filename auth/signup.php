@@ -13,6 +13,7 @@ $verifycode = rand(10000, 99999);
 $stmt = $con->prepare("SELECT * FROM users WHERE user_email = ? OR user_phone = ?");
 $stmt->execute(array($email, $phone));
 $count = $stmt->rowCount();
+
 if($count > 0){
     failureMessage("user already exists");
 }else{

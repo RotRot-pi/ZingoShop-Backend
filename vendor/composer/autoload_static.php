@@ -28,6 +28,7 @@ class ComposerStaticInit19964d6cde04a3e6a8a99fc6c06f99e9
             'Symfony\\Polyfill\\Php80\\' => 23,
             'Symfony\\Polyfill\\Mbstring\\' => 26,
             'Symfony\\Polyfill\\Ctype\\' => 23,
+            'Stripe\\' => 7,
         ),
         'P' => 
         array (
@@ -78,6 +79,10 @@ class ComposerStaticInit19964d6cde04a3e6a8a99fc6c06f99e9
         'Symfony\\Polyfill\\Ctype\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-ctype',
+        ),
+        'Stripe\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/stripe/stripe-php/lib',
         ),
         'Psr\\Log\\' => 
         array (

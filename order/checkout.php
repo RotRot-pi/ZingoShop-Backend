@@ -1,14 +1,14 @@
-<?php 
-include "../connect.php" ;
+<?php
+include "../connect.php";
 
 // Get order details from the request (likely a POST request)
 
 $userId = filterFormFields("user_id");
 $addressId = filterFormFields("address_id");
-$orderType = filterFormFields("order_type"); 
-$deliveryPrice = filterFormFields("delivery_price"); 
+$orderType = filterFormFields("order_type");
+$deliveryPrice = filterFormFields("delivery_price");
 $orderPrice = filterFormFields("order_price");
-$couponId = filterFormFields("coupon_id"); 
+$couponId = filterFormFields("coupon_id");
 $couponDiscount = filterFormFields("coupon_discount");
 $paymentType = filterFormFields("payment_type");
 
@@ -18,21 +18,53 @@ $paymentType = filterFormFields("payment_type");
 $totalPrice = $orderPrice + $deliveryPrice;
 
 // Check and apply coupon discount (your existing code)
-if($checkCoupon > 0){ 
+if ($checkCoupon > 0) {
     $totalPrice = $totalPrice - ($orderPrice * $couponDiscount / 100);
     $stmt = $con->prepare("UPDATE coupon SET coupon_count = coupon_count - 1 WHERE coupon_id = $couponId");
     $stmt->execute();
 }
+// Stripe Payment
+\Stripe\Stripe::setApiKey(STRIPE_SECRET_KEY); // Use your secret key from Stripe
+
+// Calculate the amount in the smallest currency unit (e.g., cents for USD)
+$amountInCents = $totalPrice * 100;
+
 
 // 1. Begin Transaction
 $con->beginTransaction();
 try {
-    // 2. Create the 'orders' record 
-    $stmt = $con->prepare("INSERT INTO orders (order_address_id, order_user_id, 
-                            order_type, order_delivery_price, order_price,
-                            order_coupon_id, order_totalprice, order_payment_type) 
-                            VALUES (:addressId, :userId, :orderType, :deliveryPrice,
-                                    :orderPrice, :couponId, :totalPrice, :paymentType)"); 
+    if ($paymentType == 1) { // Payment by Card
+        // Stripe Payment
+        \Stripe\Stripe::setApiKey(STRIPE_SECRET_KEY); // Use your secret key from Stripe
+        
+        // Calculate the amount in the smallest currency unit (e.g., cents for USD)
+        $amountInCents = $totalPrice * 100;
+
+        $paymentIntent = \Stripe\PaymentIntent::create([
+            'amount' => ceil($amountInCents),
+            'currency' => 'usd',
+            'automatic_payment_methods' => ['enabled' => true],
+        ]);
+
+        // Save the Stripe PaymentIntent ID
+        $paymentIntentId = $paymentIntent->id;
+
+        // Include paymentIntentId in the order
+        $stmt = $con->prepare("INSERT INTO orders (order_address_id, order_user_id, 
+                                order_type, order_delivery_price, order_price,
+                                order_coupon_id, order_totalprice, order_payment_type, stripe_payment_intent_id) 
+                                VALUES (:addressId, :userId, :orderType, :deliveryPrice,
+                                        :orderPrice, :couponId, :totalPrice, :paymentType, :paymentIntentId)");
+
+        $stmt->bindParam(':paymentIntentId', $paymentIntentId); // For Stripe
+    } elseif ($paymentType == 0) { // Payment by Hand
+        // Directly create the order without payment
+        $stmt = $con->prepare("INSERT INTO orders (order_address_id, order_user_id, 
+                                order_type, order_delivery_price, order_price,
+                                order_coupon_id, order_totalprice, order_payment_type) 
+                                VALUES (:addressId, :userId, :orderType, :deliveryPrice,
+                                        :orderPrice, :couponId, :totalPrice, :paymentType)");
+    }               
 
     // Bind ALL parameters (make sure this matches your SQL query exactly)
     $stmt->bindParam(':addressId', $addressId, PDO::PARAM_INT);
@@ -42,7 +74,7 @@ try {
     $stmt->bindParam(':orderPrice', $orderPrice);    // Assuming this is a decimal or float
     $stmt->bindParam(':couponId', $couponId, PDO::PARAM_INT);
     $stmt->bindParam(':totalPrice', $totalPrice);    // Assuming this is a decimal or float
-    $stmt->bindParam(':paymentType', $paymentType, PDO::PARAM_INT); 
+    $stmt->bindParam(':paymentType', $paymentType, PDO::PARAM_INT);
     $stmt->execute();
 
     $orderId = $con->lastInsertId(); // Get the new order_id
@@ -56,11 +88,19 @@ try {
 
     // 4. Commit the transaction 
     $con->commit();
-    successMessage();  
+    // For card payments, send the PaymentIntent's client secret to the frontend
+    if ($paymentType == 1) {
+        echo json_encode(['client_secret' => $paymentIntent->client_secret]);
+    } else {
+        successMessage(); // For hand payments, just confirm success
+    }
+} catch (\Stripe\Exception\ApiErrorException $e) {
+    $con->rollBack();
+    failureMessage("Payment failed: " . $e->getMessage());
 } catch (PDOException $e) {
     $con->rollBack();
     // ... Handle the error, log it, and send an error response
-    failureMessage("Checkout failed: " . $e->getMessage()); 
+    failureMessage("Checkout failed: " . $e->getMessage());
 }
 
 

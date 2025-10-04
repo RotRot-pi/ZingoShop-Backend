@@ -184,3 +184,7 @@ This documentation outlines the RESTful API endpoints for the ZingoShop backend.
 ## Contribution Guidelines
 
 Contributions are encouraged! If you discover any issues, have ideas for improvements, or want to contribute to the project's development, please open an issue or submit a pull request.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
